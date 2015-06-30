@@ -9,19 +9,23 @@ unsigned int countKeyPress(char wanted[], char typed[])
   unsigned int presses = 0;
   size_t wantedLength = strlen(wanted);
   size_t typedLength = strlen(typed);
-  
+
   // Calculate number of deletions
-  for(unsigned int i=0; i<std::min(wantedLength,typedLength); ++i)
+  for(unsigned int i=0; i<typedLength; ++i)
   {
     if(wanted[i] != typed[i])
     {    
       presses += typedLength - i;
       break;
     }
-  } 
+	if(wantedLength < i)
+	{
+		presses += typedLength - wantedLength;
+	}
+  }
+
   // Calculate number of new characters
-  presses += std::max(wantedLength,typedLength) 
-                   - (std::min(wantedLength,typedLength) - presses);
+  presses += wantedLength - (typedLength - presses);
 
   return presses;
 }
