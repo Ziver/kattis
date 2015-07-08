@@ -1,26 +1,35 @@
 #include <iostream>
 #include <stdio.h>
+#include <limits.h>
+#include <cstring>
 
 #define MAX_ARR_SIZE 100000
 
 int arrLength;
 int arr[MAX_ARR_SIZE];
 
-int resultArrLength;
-int resultArr[MAX_ARR_SIZE];
 
-int findLongestSequence(int arrSeq[], int arrSeqLength)
+int findLongestSequence(int index, int*& resultArr)
 {
-    if(arrSeqLength <= 0)
+    if(index >= arrLength)
         return 0;
     int longestSeq = 1;
-    for(int i=1; i<arrSeqLength; ++i)
+    resultArr = new int[arrLength-index];
+    resultArr[0] = index;
+    for(int i=index+1; i<arrLength; ++i)
     {
-        if(arrSeq[0] < arrSeq[i])
+        if(arr[index] < arr[i])
         {
-            int tmpLen = 1 + findLongestSequence(&arrSeq[i], arrSeqLength-i);
-            if(tmpLen > longestSeq)
-                longestSeq = tmpLen;
+            int* tmpArr;
+            int tmpLen = findLongestSequence(i, tmpArr);
+            if(tmpLen > longestSeq - 1)
+            {
+                longestSeq = tmpLen + 1;
+                for(int i=0; i<tmpLen; ++i)
+                    resultArr[i+1] = tmpArr[i];
+                //memcpy(&resultArr[1], tmpArr, tmpLen);
+                delete[] tmpArr;
+            }
         }
     }
     return longestSeq;
@@ -29,15 +38,19 @@ int findLongestSequence(int arrSeq[], int arrSeqLength)
 int main()
 {    
     while( std::cin >> arrLength )
-    {        
-        for(int i=0; i<arrLength; ++i)
+    {
+        arr[0] = INT_MIN;
+        ++arrLength;
+        for(int i=1; i<arrLength; ++i)
             scanf("%d", &arr[i]);
         
-        resultArrLength = findLongestSequence(arr, arrLength);
+        int* resultArr;
+        int resultArrLength = findLongestSequence(0, resultArr);
         
-        std::cout << resultArrLength << std::endl;
-        for(int i=0; i<resultArrLength; ++i)
-            std::cout << resultArr[i] << " ";
-            std::cout << std::endl;
+        std::cout << resultArrLength-1 << std::endl;
+        for(int i=1; i<resultArrLength; ++i)
+            std::cout << resultArr[i]-1 << " ";
+        std::cout << std::endl;
+        delete[] resultArr;
     }    
 }
