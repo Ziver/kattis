@@ -15,30 +15,20 @@ int resultLink[MAX_ARR_SIZE];
 int findLongestSequence()
 {
     int globalMaxIndex = 0;
-    for(int i=0; i<arrLength; ++i)
+    for(int i=arrLength-1; i>=0; --i)
     {
-        for(int j=0; j<i; ++j)
+        for(int j=i+1; j<arrLength; ++j)
         {
-            //std::cout << "arr["<<j<<"]="<<arr[j]<<" < arr["<<i<<"]="<<arr[i]<<" && currentMax="<<currentMax<<" < resultArr["<<j<<"]="<<resultArr[j]<<" ";
-            if(arr[j] < arr[i] && resultArr[i] <= resultArr[j])
+            if(arr[j] > arr[i] && resultArr[i] <= resultArr[j])
             {
-                //std::cout << "best";
                 resultArr[i] = resultArr[j] + 1;
                 resultLink[i] = j;
             }
-            //std::cout << std::endl;
         }
         if(resultArr[globalMaxIndex] < resultArr[i])
             globalMaxIndex = i;
     }
 
-    /*std::cout << "resultArr:  ";
-    for(int i=0; i< arrLength; ++i)
-        std::cout << resultArr[i] << " ";
-    std::cout << std::endl << "resultLink: ";
-    for(int i=0; i< arrLength; ++i)
-        std::cout << resultLink[i] << " ";
-    std::cout << std::endl << "index: " << globalMaxIndex << std::endl;*/
     return globalMaxIndex;
 }
 
