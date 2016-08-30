@@ -1,7 +1,5 @@
 #include <iostream>
 #include <stdio.h>
-#include <limits.h>
-#include <cstring>
 
 #define MAX_ARR_SIZE 100000
 
@@ -34,8 +32,7 @@ int findLongestSequence()
 
 
 int main()
-{    
-    arr[0] = INT_MIN;
+{
     while( std::cin >> arrLength )
     {
         for(int i=0; i<arrLength; ++i)
