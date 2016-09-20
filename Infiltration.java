@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashSet;
 
 
@@ -16,25 +20,37 @@ public class Infiltration{
 	};
 	public static String[] input;
 	public static int uniqueChars;
+    //public static HashSet<Integer> cache;
 	public static SubstitutionMap solution;
 
 
-	public static void main(String[] args){
-		input = args;
-		uniqueChars = countUniqueChars();
-		try{
-			breakDecrypt(0, new SubstitutionMap());
-		} catch(IllegalStateException e){
-			solution = null;
-		}
+	public static void main(String[] args) throws IOException {
+	    String[] msg;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))){
+             msg = in.readLine().split(" ");
+        }
+        SubstitutionMap solution = breakDecrypt(msg);
 
 		if (solution != null){
-            solution.decrypt(input);
+            System.out.println(solution.decrypt(input));
 			//solution.print();
 		} else {
 			System.out.println("Impossible");
 		}
 	}
+
+    public static final SubstitutionMap breakDecrypt(String[] input){
+        if (input.length == 0)
+            return null;
+        try {
+            solution = null;
+            Infiltration.input = input;
+
+            uniqueChars = countUniqueChars();
+            breakDecrypt(0, new SubstitutionMap());
+        } catch (IllegalStateException e) {}
+        return solution;
+    }
 
 	public static int countUniqueChars(){
 		HashSet<Character> set = new HashSet<>();
@@ -47,13 +63,13 @@ public class Infiltration{
 	}
 
 
-
-
 	public static final void breakDecrypt(int inputIndex, SubstitutionMap map){
 		if (inputIndex >= input.length) { // The end?
 			if (map.size == uniqueChars){
-				if (solution != null)
-					throw new IllegalStateException("Solution already found");
+			    if (solution != null && !solution.equals(map)) {
+                    solution = null;
+                    throw new IllegalStateException("Second solution found");
+                }
 				solution = map;
 			}
 			return; 
@@ -72,7 +88,8 @@ public class Infiltration{
 
 
 
-	public static class SubstitutionMap{
+
+    public static class SubstitutionMap{
 		public char[] decodeMap = new char[26]; // [enc] -> clear
 		public char[] encodeMap = new char[26]; // [clear] -> enc
 		public int size;
@@ -81,26 +98,26 @@ public class Infiltration{
 		public boolean keyValidForWord(String enc, String word){
 			char[] tmpDecodeMap = new char[26];
 			for (int i=0; i<enc.length(); ++i) {
-				char c = decodeMap[enc.charAt(i)-97];
-				char d = encodeMap[word.charAt(i)-97];
-				char z = tmpDecodeMap[enc.charAt(i)-97];
+				char c = decodeMap[enc.charAt(i) - 'a'];
+				char d = encodeMap[word.charAt(i) - 'a'];
+				char z = tmpDecodeMap[enc.charAt(i) - 'a'];
 				if (c != 0 && c != word.charAt(i))
 					return false;
 				else if (z != 0 && z != word.charAt(i))
 					return false;
 				else if (d != 0 && d != enc.charAt(i))
 					return false;
-				tmpDecodeMap[enc.charAt(i)-97] = word.charAt(i);
+				tmpDecodeMap[enc.charAt(i) - 'a'] = word.charAt(i);
 			}
 			return true;
 		}
 
 		public void applywordToMap(String enc, String word){
 			for (int i=0; i<enc.length(); ++i) {
-				if (decodeMap[enc.charAt(i)-97] == 0)
+				if (decodeMap[enc.charAt(i) - 'a'] == 0)
 					++size;
-				decodeMap[enc.charAt(i)-97] = word.charAt(i);
-				encodeMap[word.charAt(i)-97] = enc.charAt(i);
+				decodeMap[enc.charAt(i) - 'a'] = word.charAt(i);
+				encodeMap[word.charAt(i) - 'a'] = enc.charAt(i);
 			}
 		}
 
@@ -119,15 +136,23 @@ public class Infiltration{
 			System.out.println();
 		}
 
-        public void decrypt(String[] encrypted){
-            for (String word : encrypted){
-                for (int i=0; i<word.length(); ++i) {
-                    char c = decodeMap[word.charAt(i)-97];
-                    System.out.print((c == 0 ? '?' : c));
-                }
-                System.out.print(' ');
-            }
-            System.out.println();
+        public String decrypt(String[] encrypted){
+            StringBuilder str = new StringBuilder(100);
+			for (int k = 0; k < encrypted.length; k++) {
+				String word = encrypted[k];
+				if (k != 0)	str.append(' ');
+				for (int i = 0; i < word.length(); ++i) {
+					char c = decodeMap[word.charAt(i) - 'a'];
+					str.append((c == 0 ? '?' : c));
+				}
+			}
+			return str.toString();
+        }
+
+        public boolean equals(Object o){
+            if (o instanceof SubstitutionMap)
+                return Arrays.equals(encodeMap, ((SubstitutionMap) o).encodeMap);
+            return false;
         }
 	}
 }
