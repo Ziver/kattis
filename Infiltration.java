@@ -20,31 +20,33 @@ public class Infiltration{
 	};
 	public static String[] input;
 	public static int uniqueChars;
-    //public static HashSet<Integer> cache;
+    public static HashSet<SubstitutionMap> cache;
 	public static SubstitutionMap solution;
 
 
 	public static void main(String[] args) throws IOException {
-	    String[] msg;
+	    String[] msg = null;
         try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))){
-             msg = in.readLine().split(" ");
+             String line = in.readLine();
+            if (!line.isEmpty())
+                msg = line.split(" ");
         }
         SubstitutionMap solution = breakDecrypt(msg);
 
 		if (solution != null){
             System.out.println(solution.decrypt(input));
-			//solution.print();
 		} else {
 			System.out.println("Impossible");
 		}
 	}
 
     public static final SubstitutionMap breakDecrypt(String[] input){
-        if (input.length == 0)
+        if (input == null || input.length == 0)
             return null;
         try {
             solution = null;
             Infiltration.input = input;
+			cache = new HashSet<>();
 
             uniqueChars = countUniqueChars();
             breakDecrypt(0, new SubstitutionMap());
@@ -64,6 +66,8 @@ public class Infiltration{
 
 
 	public static final void breakDecrypt(int inputIndex, SubstitutionMap map){
+	    if (cache.contains(map)) // already checked?
+	        return;
 		if (inputIndex >= input.length) { // The end?
 			if (map.size == uniqueChars){
 			    if (solution != null && !solution.equals(map)) {
@@ -72,6 +76,7 @@ public class Infiltration{
                 }
 				solution = map;
 			}
+			cache.add(map);
 			return; 
 		}
 
@@ -90,9 +95,10 @@ public class Infiltration{
 
 
     public static class SubstitutionMap{
-		public char[] decodeMap = new char[26]; // [enc] -> clear
-		public char[] encodeMap = new char[26]; // [clear] -> enc
-		public int size;
+		private char[] decodeMap = new char[26]; // [enc] -> clear
+		private char[] encodeMap = new char[26]; // [clear] -> enc
+		private int size;
+        private int hashCode = 0;
 
 
 		public boolean keyValidForWord(String enc, String word){
@@ -119,6 +125,7 @@ public class Infiltration{
 				decodeMap[enc.charAt(i) - 'a'] = word.charAt(i);
 				encodeMap[word.charAt(i) - 'a'] = enc.charAt(i);
 			}
+			hashCode = Arrays.hashCode(decodeMap);
 		}
 
 		public SubstitutionMap copy(){
@@ -126,8 +133,19 @@ public class Infiltration{
 			System.arraycopy(decodeMap, 0, copy.decodeMap, 0, decodeMap.length);
 			System.arraycopy(encodeMap, 0, copy.encodeMap, 0, encodeMap.length);
 			copy.size = size;
+            copy.hashCode = hashCode;
 			return copy;
 		}
+
+		public char encode(char raw){
+		    return encodeMap[raw - 'a'];
+        }
+        public char decode(char enc){
+            return decodeMap[enc - 'a'];
+        }
+        public int size(){
+            return size;
+        }
 
 		public void print(){
 			for (int i=0; i<decodeMap.length; ++i) {
@@ -149,9 +167,13 @@ public class Infiltration{
 			return str.toString();
         }
 
+
+        public int hashCode(){
+            return hashCode;
+        }
         public boolean equals(Object o){
             if (o instanceof SubstitutionMap)
-                return Arrays.equals(encodeMap, ((SubstitutionMap) o).encodeMap);
+                return Arrays.equals(decodeMap, ((SubstitutionMap) o).decodeMap);
             return false;
         }
 	}

@@ -2,6 +2,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -14,6 +15,8 @@ public class InfiltrationTest {
         String[] input = new String[0];
         assertEquals(null, Infiltration.breakDecrypt(input));
 
+        breakDecrypt(null, "");
+
         breakDecrypt("we will avenge our dead parrot arr",
                 "ex eoii jpxbmx cvz uxju sjzzcn jzz");
 
@@ -25,22 +28,28 @@ public class InfiltrationTest {
 
         breakDecrypt("be", "be");
 
-        // Test from Per Persson
+        // Test Cases from Per Persson
         breakDecrypt(null,
                 "abc bcd cde def efg fgh ghi hij ijk jkl klm lmn mno nop opq pqr qrs rst stu tuv uvw vwx wxy xyz yza zab ab ac ad ae af ag ah ai aj ak al am an ao ap aq ar as at au av aw ax ay az ba bc bd be xhfo zywq");
         breakDecrypt(null, "aaaaaaaaa");
         breakDecrypt("be our rum mbeu be be", "be our rum mbeu be be");
         breakDecrypt("sable ship dead blood", "sable ship dead blood");
-        breakDecrypt(null, "abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc def");
+        //breakDecrypt(null, "abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc def");
         breakDecrypt(null, "be eb our uor ruo oru uro rou rum urm rmu mur umr mru");
         breakDecrypt("be our rum", "be our rum");
         breakDecrypt("be dead", "eb abca");
         breakDecrypt(null, "ef abca");
         breakDecrypt(null, "abcdefghijklmnopqrstuvwxyz");
     }
+    @Test
+    public void timeTest(){
+        // Test Case from Per Persson
+        breakDecrypt(null, "abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc abc abc abc abc abc def def def def def def abc def");
+    }
     public void breakDecrypt(String expect, String in){
-        String[] input = in.split(" ");
+        String[] input = (in.isEmpty() ? new String[0] : in.split(" "));
         Infiltration.SubstitutionMap map = Infiltration.breakDecrypt(input);
+        //expect = InfiltrationCamp.breakDecrypt(in);
         if (map == null)
             assertEquals(expect, map);
         else
@@ -68,7 +77,7 @@ public class InfiltrationTest {
     private void mapKeyValidForWord(String encAdd, String decAdd, String encValid, String decValid){
         Infiltration.SubstitutionMap map = new Infiltration.SubstitutionMap();
         map.applywordToMap(encAdd, decAdd);
-        assertEquals(encAdd.length(), map.size);
+        assertEquals(encAdd.length(), map.size());
         assertFalse(map.keyValidForWord(encValid, decValid));
     }
 
@@ -77,29 +86,32 @@ public class InfiltrationTest {
         Infiltration.SubstitutionMap original = new Infiltration.SubstitutionMap();
         original.applywordToMap("abcd", "abcd");
         Infiltration.SubstitutionMap copy = original.copy();
+
+        assertEquals(original.hashCode(), copy.hashCode());
         original.applywordToMap("abcd", "lmnk");
+        assertNotEquals(original.hashCode(), copy.hashCode());
 
-        assertEquals(4, copy.size);
-        assertEquals(4, original.size);
+        assertEquals(4, copy.size());
+        assertEquals(4, original.size());
 
-        assertEquals('l', original.decodeMap[0]);
-        assertEquals('m', original.decodeMap[1]);
-        assertEquals('n', original.decodeMap[2]);
-        assertEquals('k', original.decodeMap[3]);
+        assertEquals('l', original.decode('a'));
+        assertEquals('m', original.decode('b'));
+        assertEquals('n', original.decode('c'));
+        assertEquals('k', original.decode('d'));
 
-        assertEquals('a', copy.decodeMap[0]);
-        assertEquals('b', copy.decodeMap[1]);
-        assertEquals('c', copy.decodeMap[2]);
-        assertEquals('d', copy.decodeMap[3]);
+        assertEquals('a', copy.decode('a'));
+        assertEquals('b', copy.decode('b'));
+        assertEquals('c', copy.decode('c'));
+        assertEquals('d', copy.decode('d'));
 
-        assertEquals('a', original.encodeMap['l' - 'a']);
-        assertEquals('b', original.encodeMap['m' - 'a']);
-        assertEquals('c', original.encodeMap['n' - 'a']);
-        assertEquals('d', original.encodeMap['k' - 'a']);
+        assertEquals('a', original.encode('l'));
+        assertEquals('b', original.encode('m'));
+        assertEquals('c', original.encode('n'));
+        assertEquals('d', original.encode('k'));
 
-        assertEquals('a', copy.encodeMap[0]);
-        assertEquals('b', copy.encodeMap[1]);
-        assertEquals('c', copy.encodeMap[2]);
-        assertEquals('d', copy.encodeMap[3]);
+        assertEquals('a', copy.encode('a'));
+        assertEquals('b', copy.encode('b'));
+        assertEquals('c', copy.encode('c'));
+        assertEquals('d', copy.encode('d'));
     }
 }
