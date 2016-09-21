@@ -55,13 +55,17 @@ public class Infiltration{
     }
 
 	public static int countUniqueChars(){
-		HashSet<Character> set = new HashSet<>();
+		boolean[] charMap = new boolean[26];
+        int count = 0;
 		for(String word : input){
 			for(int i=0; i<word.length(); ++i){
-				set.add(word.charAt(i));
+				if (!charMap[word.charAt(i) - 'a']){
+				    ++count;
+                    charMap[word.charAt(i) - 'a'] = true;
+                }
 			}
 		}
-		return set.size();
+		return count;
 	}
 
 
@@ -101,19 +105,29 @@ public class Infiltration{
         private int hashCode = 0;
 
 
+        // we are running on one thread so we might be able to save time by declaring the data as static
+        static char[] tmpDecodeMap = new char[26];
+        static char[] tmpEncodeMap = new char[26];
 		public boolean keyValidForWord(String enc, String word){
-			char[] tmpDecodeMap = new char[26];
-			for (int i=0; i<enc.length(); ++i) {
+            for (int i = 0; i < 26; i++) {
+                tmpDecodeMap[i] = 0;
+                tmpEncodeMap[i] = 0;
+            }
+            for (int i=0; i<enc.length(); ++i) {
 				char c = decodeMap[enc.charAt(i) - 'a'];
 				char d = encodeMap[word.charAt(i) - 'a'];
-				char z = tmpDecodeMap[enc.charAt(i) - 'a'];
-				if (c != 0 && c != word.charAt(i))
+				char y = tmpDecodeMap[enc.charAt(i) - 'a'];
+				char z = tmpEncodeMap[word.charAt(i) - 'a'];
+				if (c != 0 && c != word.charAt(i)) // is there already a decoding mapping
 					return false;
-				else if (z != 0 && z != word.charAt(i))
+				else if (d != 0 && d != enc.charAt(i)) // is there already a encoding mapping
 					return false;
-				else if (d != 0 && d != enc.charAt(i))
-					return false;
+                else if (y != 0 && y != word.charAt(i)) // do we have two enc letters pointing to same clear letter
+                    return false;
+                else if (z != 0 && z != enc.charAt(i)) // do we have two clear letters pointing to same enc letter
+                    return false;
 				tmpDecodeMap[enc.charAt(i) - 'a'] = word.charAt(i);
+                tmpEncodeMap[word.charAt(i) - 'a'] = enc.charAt(i);
 			}
 			return true;
 		}
@@ -125,7 +139,7 @@ public class Infiltration{
 				decodeMap[enc.charAt(i) - 'a'] = word.charAt(i);
 				encodeMap[word.charAt(i) - 'a'] = enc.charAt(i);
 			}
-			hashCode = Arrays.hashCode(decodeMap);
+			hashCode = -1;
 		}
 
 		public SubstitutionMap copy(){
@@ -169,6 +183,8 @@ public class Infiltration{
 
 
         public int hashCode(){
+            if (hashCode < 0)
+                hashCode = Arrays.hashCode(decodeMap);
             return hashCode;
         }
         public boolean equals(Object o){

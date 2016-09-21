@@ -17,16 +17,17 @@ public class InfiltrationTest {
 
         breakDecrypt(null, "");
 
-        breakDecrypt("we will avenge our dead parrot arr",
-                "ex eoii jpxbmx cvz uxju sjzzcn jzz");
-
-        breakDecrypt(null, "wl jkd");
-
-        breakDecrypt(null, "dyd jkl cs");
-
-        breakDecrypt(null, "bee");
+//        breakDecrypt("we will avenge our dead parrot arr",
+//                "ex eoii jpxbmx cvz uxju sjzzcn jzz");
+//
+//        breakDecrypt(null, "wl jkd");
+//
+//        breakDecrypt(null, "dyd jkl cs");
+//
+//        breakDecrypt(null, "bee");
 
         breakDecrypt("be", "be");
+        breakDecrypt("be", "ab");
 
         // Test Cases from Per Persson
         breakDecrypt(null,
@@ -49,12 +50,44 @@ public class InfiltrationTest {
     public void breakDecrypt(String expect, String in){
         String[] input = (in.isEmpty() ? new String[0] : in.split(" "));
         Infiltration.SubstitutionMap map = Infiltration.breakDecrypt(input);
-        //expect = InfiltrationCamp.breakDecrypt(in);
         if (map == null)
             assertEquals(expect, map);
         else
             assertEquals(expect, map.decrypt(input));
     }
+
+
+    @Test
+    public void randomTestCase(){
+        for (int i=0; i <200_000; i++) {
+            decryptCompare(generateLine());
+        }
+    }
+    public void decryptCompare(String in){
+        //System.out.println(in);
+        //System.out.flush();
+        String[] input = in.split(" ");
+        //String expect = InfiltrationCamp.breakDecrypt(in);
+        Infiltration.SubstitutionMap map = Infiltration.breakDecrypt(input);
+        /*if (map == null)
+            assertEquals(expect, map);
+        else
+            assertEquals(expect, map.decrypt(input));
+            */
+    }
+    public String generateLine(){
+        StringBuilder str = new StringBuilder();
+        int nrOfWords = 1+(int)(Math.random()*20);
+        for (int i=0; i<nrOfWords; ++i){
+            if (i != 0) str.append(' ');
+            int nrOfLetters = 1+(int)(Math.random()*20);
+            for (int j=0; j < nrOfLetters; j++) {
+                str.append((char)('a' + (int)(Math.random()*26)));
+            }
+        }
+        return str.toString();
+    }
+
 
     @Test
     public void mapKeyValidForWord(){
@@ -72,6 +105,12 @@ public class InfiltrationTest {
         mapKeyValidForWord("abcd", "axcd",      "abcd", "abcd");
         mapKeyValidForWord("abcd", "abxd",      "abcd", "abcd");
         mapKeyValidForWord("abcd", "abcx",      "abcd", "abcd");
+
+        // check duplicate references
+        map = new Infiltration.SubstitutionMap();
+        assertFalse(map.keyValidForWord("fkcegyr", "captain"));
+        assertFalse(map.keyValidForWord("captain", "fkcegyr"));
+        assertTrue (map.keyValidForWord("be", "ab"));
     }
 
     private void mapKeyValidForWord(String encAdd, String decAdd, String encValid, String decValid){

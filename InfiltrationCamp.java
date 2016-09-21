@@ -11,7 +11,6 @@ import java.util.Arrays;
  */
 
 class InfiltrationCamp {
-    private static final int MAX_WORD_LENGTH = 7;
     private static final int ALPHABET_SIZE = 26;
     private static final String[][] dictionary = {{}, {},
             {"be"},
@@ -113,7 +112,7 @@ class InfiltrationCamp {
         ArrayList<char[]> list = new ArrayList<>();
         //For each word in the crypto, create possible keys using every sme size word in the dictionary
         for (String cryptoWord : crypto) {
-            if (cryptoWord.length() <= MAX_WORD_LENGTH) {
+            if (cryptoWord.length() < dictionary.length) {
                 nextDictWord:
                 for (String dictWord : dictionary[cryptoWord.length()]) {
                     char[] potentialKey = new char[ALPHABET_SIZE];
@@ -134,11 +133,17 @@ class InfiltrationCamp {
     }
 
     private static int getUniqueLetters(String[] message) {
-        HashSet<Character> set = new HashSet<>();
-        for (String s : message)
-            for (char c : s.toCharArray())
-                set.add(c);
-        return set.size();
+        boolean[] charMap = new boolean[26];
+        int count = 0;
+        for(String word : message){
+            for(int i=0; i<word.length(); ++i){
+                if (!charMap[word.charAt(i) - 'a']){
+                    ++count;
+                    charMap[word.charAt(i) - 'a'] = true;
+                }
+            }
+        }
+        return count;
     }
 
     private static int countLetters(char[] map) {
