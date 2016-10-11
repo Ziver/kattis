@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Created by Coding Camp on 2016-10-11.
+ * Created by Ziver on 2016-10-11.
  */
 public class RotateAndCut {
 
@@ -27,24 +27,19 @@ public class RotateAndCut {
 
 
     public String calc(int cuts, String originalMsg) {
-        return calc(cuts, originalMsg, true);
-    }
-    public String calc(int cuts, String originalMsg, boolean cutInFront) {
-        if (cuts == 0)
-            return originalMsg;
-        int charToCut = originalMsg.length() / 4;
-        if (charToCut == 0)
-            return originalMsg;
-
-        if (cutInFront)
-            return calc(
-                    cuts-1,
-                    originalMsg.substring(charToCut),
-                    !cutInFront);
-        else
-            return calc(
-                    cuts-1,
-                    originalMsg.substring(0, originalMsg.length()-charToCut),
-                    !cutInFront);
+        int start = 0;
+        int end = originalMsg.length();
+        int currentLength = end;
+        boolean cutInFront = true;
+        while (cuts > 0 && currentLength > 3){
+            currentLength = end - start;
+            if (cutInFront)
+                start += currentLength / 4;
+            else
+                end -= currentLength / 4;
+            --cuts;
+            cutInFront = !cutInFront;
+        }
+        return originalMsg.substring(start, end);
     }
 }
